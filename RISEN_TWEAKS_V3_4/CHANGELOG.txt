@@ -1,0 +1,71 @@
+RISEN TWEAKS V3.4.0
+- Performance: Messwerte (CPU/RAM/Netz/GPU/Fortnite-Suche) laufen im Hintergrund-Thread statt in der Oberfläche.
+  Seiten werden erst beim ersten Öffnen gebaut (schneller Start, kein Seitenwechsel-Lag). Tweak-Karten werden einmal gebaut
+  und wiederverwendet statt bei jedem Klick neu erzeugt (vorher: ~40 Karten mit je ~10 Widgets, Ursache für Ruckeln und Darstellungsfehler).
+  Animationen (Shimmer/Puls) sparsamer. Fortnite-Prozesssuche gecacht.
+- Neu: System Overview mit Ring-Anzeigen (CPU, GPU, RAM, Laufwerk), Live-Verlaufsgrafiken, Netzwerk-Verlauf, Sensorblock, Schnellaktionen.
+- Neu: Process Manager mit Kacheln (Prozesse, CPU, RAM, Top-Verbraucher), Last-Heatmap, Filter (Alle/Hohe Last/Fortnite),
+  Sortierung, Priorität HOCH/NORMAL/NIEDRIG, Beenden mit Schutz für Systemprozesse.
+- Neu: Fortnite Optimizer: Ein-Klick FORTNITE OPTIMIEREN (beendet Fortnite nach Rückfrage, schreibt Config, prüft per Rücklesen),
+  automatische Priorität HOCH beim Spielstart, eigene Tweak-Karten.
+- Neue echte Fortnite-Config-Tweaks: Grafik auf Leistung (Schatten, Post, Effekte, Laub, Shading, GI, Reflexionen),
+  Vollbild-Modus, Bewegungsunschärfe aus, Menü-FPS 60 (schreibt in beide Abschnitte der GameUserSettings.ini).
+- Navigation aufgeräumt: Home, Tweaks, Fortnite, Processes, Network Lab, Hardware, Cleanup, Tools.
+- Tests: 51 Unit-Tests + UI-Smoke-Test über alle Seiten.
+
+RISEN TWEAKS V3.3.0
+- Neu: 11 weitere Tweaks, jeweils mit Backup, Rücklese-Verifikation und Undo:
+  Netzwerk-Drosselung aus + Systemreaktionszeit 0, Spiele-Scheduler (GPU/CPU-Priorität), Win32PrioritySeparation (Vordergrund),
+  Power Throttling aus, Vollbild-Verhalten (FSE), schnelle Tastaturwiederholung, Hintergrund-Apps aus, Telemetrie-Richtlinie,
+  DiagTrack-Dienst aus, Delivery Optimization aus, GPU im MSI-Modus (nur Display-Geräte, zur Laufzeit erkannt).
+- Neu: HKLM-Tweaks (Adminrechte). Ohne Admin sind sie markiert (🔒), gesperrt und werden vom Auto-Modus übersprungen.
+  Button "Als Administrator neu starten" im Tweaks-Tab.
+- Profile: SAFE = nur Basis; COMPETITIVE = alles Empfohlene; MAX FPS = zusätzlich Effekte, Hintergrund-Apps, Telemetrie, MSI.
+- Nicht enthalten (bewusst): Defender/Firewall aus, Treiber-Neuinstallation (DDU), BIOS, bcdedit/HPET, Nagle/TCP-Registry.
+- Tests: tests/test_v33.py (Admin-Sperre, HKLM-Backup/Undo, MSI nur für GPUs, Profile).
+
+RISEN TWEAKS V3.2.0
+- Neu: eigener TWEAKS-Tab (Startseite): alle Tweaks mit Schaltern auf einer Seite, Suche, Filter (Alle/Aktiv/Inaktiv/Empfohlen),
+  Empfohlen-Badge, Kategorie-Label, Status pro Karte.
+- Neu: Schalter wirken SOFORT (kein APPLY, keine Dialoge). Backup vorher, Verifikation danach, Undo per Schalter.
+- Neu: AUTO OPTIMIZE: erkennt Desktop/Notebook, GPU, Fortnite-Config, waehlt die passenden Tweaks, wendet sie an,
+  raeumt Temp-Dateien auf und leert den DNS-Cache. Mit Adminrechten wird vorher ein Wiederherstellungspunkt erstellt.
+- Neu: Profile SAFE / COMPETITIVE / MAX FPS (tweaklib.select_for_profile, getestet).
+- Aenderung: Tweak-Karten haben keine "Oeffnen"-Buttons mehr; was die Software selbst tun kann, tut sie selbst.
+- Neu: staerkere Hover-Effekte (Cyan-Glow-Rahmen, weiche Fades) auf Karten und Buttons des Tweaks-Tabs.
+- Tests: tests/test_profiles.py, Smoke-Test deckt Tweaks-Tab und Auto-Modus ab.
+
+RISEN TWEAKS V3.1.0
+- Neues Design: tiefschwarz mit Violett/Cyan, animierte Gradient-Leiste, weiche Hover-Fades auf Karten, Chips und Buttons,
+  Sidebar mit aktivem Glow, pulsierender Admin-Anzeige.
+- Neu: Control Center als Startseite: Schalter pro Tweak, APPLY, APPLY & RESTART (20 s Countdown, abbrechbar),
+  Fortschrittsbalken, Kategorie-Chips.
+- Neu: BEST TWEAKS FOR MY PC: erkennt Desktop/Notebook, Fortnite-Config und bereits aktive Tweaks, zeigt die Auswahl mit
+  Begruendung und fuehrt sie nach Bestaetigung aus (Backup + Verifikation, Energieplan-Fallback).
+- Neue echte Tweaks: Prozessor-Mindestzustand 100 %, PCIe-ASPM aus, USB Selective Suspend aus (powercfg, nur Netzbetrieb),
+  Fortnite FPS-Limit 240 und V-Sync aus (GameUserSettings.ini mit Dateikopie, nur bei geschlossenem Fortnite).
+
+RISEN TWEAKS V3.0.0
+- Neu: Tweak Library (14 Kategorien) mit Apply/Undo/Status/Backup/Verifikation, alle Tweaks nur HKCU.
+- Neu: Network Lab (Ping/Jitter/Verlust, Gateway, DNS-Zeit, Epic-TCP, Download/Upload, Adapter/LAN-Status).
+- Neu: Fortnite Live-Messung ueber PresentMon (FPS, Frametime, 1% Low, 0,1% Low, Ruckler), Hintergrundlast.
+- Neu: Autostart-Verwaltung (Umschalten wie im Task-Manager, nichts wird geloescht).
+- Neu: Sidebar-Tooltips, GPU-Takt, CPU-Takt, RAM-Modul-Takt (DOCP-Hinweis), CPU-Temperatur ehrlich als N/A.
+- Fix: Jitter war max-min, jetzt mittlere Differenz aufeinanderfolgender Pings; Paketverlust zaehlt gesendete Pings.
+- Fix: Mausbeschleunigung wird sofort uebernommen (SystemParametersInfo), alte Werte per Undo.
+- Aenderung: Alte Windows-Tweaks laufen ueber die neue Engine (ein einheitliches Backup-System).
+- Build: robuster Workflow (findet Projektordner, Tests, EXE-Selbsttest).
+
+RISEN TWEAKS V2.0.0
+- Neue dunkle Oberfläche mit schmaler Icon-Seitenleiste und großen Gruppen-/Aktionenkarten.
+- Seiten für Home, Windows Tweaks, Performance, Cleanup, GPU Optimization, Fortnite,
+  Processes, Hardware und Tools.
+- Hardware-Erkennung über Windows CIM/PowerShell und psutil.
+- NVIDIA-SMI Telemetrie, wenn Treiber und Tool verfügbar sind.
+- Prozesssuche, CPU-/RAM-Sortierung und bestätigtes Beenden ausgewählter Prozesse.
+- Fortnite-Priorität HOCH/NORMAL, Config-Ordner, Epic Launcher und Netzwerkdiagnose.
+- Sichere, gesicherte Benutzer-Registry-Tweaks: Game Mode, Game DVR, VisualFXSetting,
+  Windows-Mausbeschleunigung.
+- Energieplanwechsel mit Sicherung des vorherigen Plans.
+- Temp-Cleanup, DNS-Cache, Autostart-Übersicht, Geräteübersicht, Systembericht.
+- Restore-Funktion für gespeicherte Registry-Werte und Energieplan.
