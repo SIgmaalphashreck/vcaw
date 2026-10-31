@@ -1,0 +1,92 @@
+name: Build RISEN TWEAKS for Windows
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Sucht main.py + requirements.txt, egal ob im Repo-Root oder in einem Unterordner.
+      - name: Locate project
+        run: |
+          Write-Host "=== Dateien im Repository (Tiefe 3) ==="
+          Get-ChildItem -Recurse -File -Depth 3 |
+            Where-Object { $_.FullName -notmatch '[\\/]\.git[\\/]' } |
+            ForEach-Object { $_.FullName.Substring($PWD.Path.Length + 1) }
+
+          $skip = '[\\/](\.git|venv|\.venv|build|dist|__pycache__)[\\/]'
+          $main = Get-ChildItem -Recurse -File -Filter main.py |
+                  Where-Object { $_.FullName -notmatch $skip } |
+                  Where-Object { Test-Path (Join-Path $_.DirectoryName 'requirements.txt') } |
+                  Select-Object -First 1
+          if (-not $main) {
+            throw "Keinen Ordner mit main.py UND requirements.txt gefunden. Siehe Dateiliste oben: beide Dateien müssen im selben Ordner liegen (Dateinamen exakt 'main.py' und 'requirements.txt')."
+          }
+          $dir = $main.DirectoryName
+          Write-Host "PROJECT_DIR = $dir"
+          "PROJECT_DIR=$dir" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: "**/requirements.txt"
+
+      - name: Install dependencies
+        working-directory: ${{ env.PROJECT_DIR }}
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt pyinstaller
+
+      - name: Check Python syntax
+        working-directory: ${{ env.PROJECT_DIR }}
+        run: |
+          python -m compileall -q main.py netlab.py tweaklib.py fnmon.py fx.py
+          if ($LASTEXITCODE -ne 0) { throw "Syntaxfehler gefunden." }
+
+      - name: Run unit tests
+        working-directory: ${{ env.PROJECT_DIR }}
+        run: python -m unittest discover -s tests -v
+
+      - name: Build portable EXE
+        working-directory: ${{ env.PROJECT_DIR }}
+        run: |
+          python -m PyInstaller --noconfirm --clean --onefile --windowed `
+            --name RISEN_TWEAKS `
+            --collect-all customtkinter `
+            main.py
+          if ($LASTEXITCODE -ne 0) { throw "PyInstaller ist fehlgeschlagen." }
+          if (-not (Test-Path "dist/RISEN_TWEAKS.exe")) { throw "dist/RISEN_TWEAKS.exe wurde nicht erstellt." }
+          Get-Item dist/RISEN_TWEAKS.exe | Format-List Name, Length
+
+      # Startet die gebaute EXE headless: prueft Tcl/Tk, winreg, psutil, customtkinter und alle Module.
+      - name: Self-test built EXE
+        working-directory: ${{ env.PROJECT_DIR }}
+        run: |
+          $p = Start-Process -FilePath "dist/RISEN_TWEAKS.exe" -ArgumentList "--selftest" -Wait -PassThru
+          $report = Join-Path $env:LOCALAPPDATA "RisenTweaks/selftest.txt"
+          if (Test-Path $report) { Get-Content $report }
+          if ($p.ExitCode -ne 0) { throw "EXE-Selbsttest fehlgeschlagen (Exitcode $($p.ExitCode))." }
+
+      - name: Upload portable EXE
+        uses: actions/upload-artifact@v4
+        with:
+          name: RISEN_TWEAKS-Windows-EXE
+          path: ${{ env.PROJECT_DIR }}/dist/RISEN_TWEAKS.exe
+          if-no-files-found: error
+          retention-days: 14
